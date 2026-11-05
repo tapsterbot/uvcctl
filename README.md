@@ -29,13 +29,13 @@ By default, a USB camera is tuned for convenience, not repeatability. Two things
 
 2. **The camera forgets everything when it loses power.** USB cameras keep their settings in temporary memory, not in storage that survives power loss. Unplugging the camera, rebooting the computer, sleep and USB hub resets all put the camera back to factory defaults, auto modes included. Your settings have to be stored on the computer and applied again. uvcctl keeps them in a small *profile* file and can re-apply it automatically.
 
-Opening and closing the camera doesn't reset the settings by itself. In testing with an Arducam 16MP on macOS, values set by hand stayed in place across stream restarts for as long as the camera had power. Other apps can still change them, though, and some do when they open the camera.
+Opening and closing the camera doesn't normally reset its settings, but other apps can change them, and some do when they open the camera.
 
 ---
 
-## Tutorial: set up fixed, repeatable camera settings
+## Getting started: fixed, repeatable camera settings
 
-This takes about five minutes. Have the camera plugged in, and have your usual camera software running (the Tapster software, a camera app, or OBS) so you can see the image while you adjust it.
+Have the camera plugged in, and have your usual camera software running (the Tapster software, a camera app, or OBS) so you can see the image while you adjust it.
 
 ### 1. Install
 
@@ -99,8 +99,8 @@ Brightness, contrast, saturation, sharpness, gamma and hue don't change on their
 ### 5. Save the settings
 
 ```
-$ uvcctl save tapster-camera.json
-Saved 15 settings to tapster-camera.json
+$ uvcctl save camera.json
+Saved 15 settings to camera.json
 ```
 
 This is a plain JSON file. You can edit it by hand, copy it to other machines with the same camera model, and keep it under version control.
@@ -110,21 +110,19 @@ This is a plain JSON file. You can edit it by hand, copy it to other machines wi
 After a reboot or replug, or before a test run:
 
 ```
-$ uvcctl load tapster-camera.json
+$ uvcctl load camera.json
 ```
 
 Or leave uvcctl running, and it re-applies the settings whenever something changes them or the camera reconnects:
 
 ```
-$ uvcctl load tapster-camera.json --watch
+$ uvcctl load camera.json --watch
 16:07:57  watching; checking every 2s (Ctrl-C to stop)
 16:07:57  applied profile to Arducam_16MP (0c45:0290)
 16:10:17  camera disconnected
-16:10:27  camera has 5 setting(s) not matching the profile: brightness 10→0, exposure 166→157, exposure_auto off→on, ...
+16:10:27  camera has 5 setting(s) not matching the profile: brightness 10→0, exposure 167→157, exposure_auto off→on, ...
 16:10:27  applied profile to Arducam_16MP (0c45:0290)
 ```
-
-That log is a real one: the camera was unplugged and plugged back in, came back at factory defaults, and uvcctl put the saved settings back.
 
 To run it automatically at login, use a launchd agent (macOS), a systemd user service (Linux), or Task Scheduler (Windows). Alternatively, call `uvcctl load` from your test setup script before every run.
 
@@ -181,7 +179,7 @@ The aliases match the names `v4l2-ctl` uses on Linux, so existing scripts transl
 - The camera must be **streaming** while it runs, because the auto modes only adjust while video is flowing.
 - Many cameras, **including the Arducam 16MP**, don't report the values their auto modes chose, and go back to the last manual values when a new stream starts. On those cameras the lock only lasts until the camera is closed, and the values can't be saved. uvcctl warns you when this happens.
 
-For settings that last, use `set`, then `save`, then `load` (the tutorial above).
+For settings that last, use `set`, then `save`, then `load` (see [Getting started](#getting-started-fixed-repeatable-camera-settings)).
 
 ---
 
@@ -240,8 +238,6 @@ The macOS build uses cgo (IOKit), so it has to be built on a Mac; `build.sh` mak
 go test ./...
 ```
 
-The tests drive the ordering logic with a fake camera that rejects manual values while auto mode is on, the way real cameras do.
-
 ---
 
 ## Troubleshooting
@@ -252,7 +248,7 @@ The tests drive the ordering logic with a fake camera that rejects manual values
 
 **`permission denied (is the matching auto mode still on?)` on Linux.** The kernel won't accept a manual value while its auto mode is on. Use `uvcctl set`, which turns the auto mode off for you, or set `exposure_auto=off` first.
 
-**Settings reset after a reboot or replug.** That's expected, since the camera can't store them. Use `uvcctl load profile.json`, or `--watch`.
+**Settings reset after a reboot or replug.** That's expected, since the camera can't store them. Use `uvcctl load camera.json`, or `--watch`.
 
 **The image still flickers or pulses under room lighting.** Set `power_line_frequency` to your mains frequency, and use an exposure that's a multiple of the flicker period (see step 4).
 
