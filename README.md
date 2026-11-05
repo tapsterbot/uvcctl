@@ -1,6 +1,6 @@
 # uvcctl
 
-A small command-line tool for USB cameras. Use it to keep exposure, white balance, gain, focus and the other image settings fixed, so they stop drifting. It runs on macOS, Linux and Windows, and works with any UVC camera: Arducam, Logitech and most other USB webcams.
+Take manual control of USB camera settings and keep them that way. uvcctl is a small command-line tool and Go library for setting exposure, white balance, gain, focus and the other image controls to exact values, saving them, and re-applying them whenever the camera resets. It runs on macOS, Linux and Windows, and works with any UVC camera: Arducam, Logitech and most other USB webcams.
 
 ```
 $ uvcctl show
@@ -21,11 +21,11 @@ contrast                32     0..64          32
 
 ---
 
-## Why the image drifts, and why settings "don't stick"
+## Auto modes and resets: why the image changes
 
-Two separate things are going on:
+By default, a USB camera is tuned for convenience, not repeatability. Two things work against getting the same image every time:
 
-1. **The auto modes are on.** Cameras ship with auto exposure, auto white balance and autofocus switched on. Those keep adjusting the image as the lighting or the scene changes. That is the drift. Setting a value such as `exposure` does nothing while its auto mode is on: depending on the OS, the camera ignores the value or refuses it. Turn the auto mode off first, then set the value. uvcctl does this for you.
+1. **The auto modes are on.** Cameras ship with auto exposure, auto white balance and autofocus switched on. They keep adjusting the image as the lighting or the scene changes. That's what they're for, but it means the same scene can look different from one run to the next. Setting a value such as `exposure` does nothing while its auto mode is on: depending on the OS, the camera ignores the value or refuses it. Turn the auto mode off first, then set the value. uvcctl does this for you.
 
 2. **The camera forgets everything when it loses power.** USB cameras keep their settings in temporary memory, not in storage that survives power loss. Unplugging the camera, rebooting the computer, sleep and USB hub resets all put the camera back to factory defaults, auto modes included. Your settings have to be stored on the computer and applied again. uvcctl keeps them in a small *profile* file and can re-apply it automatically.
 
@@ -33,7 +33,7 @@ Opening and closing the camera doesn't reset the settings by itself. In testing 
 
 ---
 
-## Tutorial: stop exposure and white balance drift
+## Tutorial: set up fixed, repeatable camera settings
 
 This takes about five minutes. Have the camera plugged in, and have your usual camera software running (the Tapster software, a camera app, or OBS) so you can see the image while you adjust it.
 
@@ -94,7 +94,7 @@ Some starting points:
 - **Focus:** the Tapster's camera-to-screen distance is fixed, so lock it too: `uvcctl set focus=144`. Adjust until the screen is sharp.
 - **Anti-flicker:** `uvcctl set power_line_frequency=60hz` (or `50hz`). This mostly matters when auto exposure is on, but it's worth setting either way.
 
-Brightness, contrast, saturation, sharpness, gamma and hue don't drift on their own. Change them only if you want a different look.
+Brightness, contrast, saturation, sharpness, gamma and hue don't change on their own. Change them only if you want a different look.
 
 ### 5. Save the settings
 
@@ -255,3 +255,9 @@ The tests drive the ordering logic with a fake camera that rejects manual values
 **Settings reset after a reboot or replug.** That's expected, since the camera can't store them. Use `uvcctl load profile.json`, or `--watch`.
 
 **The image still flickers or pulses under room lighting.** Set `power_line_frequency` to your mains frequency, and use an exposure that's a multiple of the flicker period (see step 4).
+
+---
+
+## License
+
+MIT. See [LICENSE](LICENSE).

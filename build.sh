@@ -26,7 +26,7 @@ done
 
 for d in dist/*/; do
   name=$(basename "$d")
-  cp README.md "$d"
+  cp README.md LICENSE "$d"
   (cd dist && zip -qr "$name.zip" "$name")
 done
 ls -lh dist/*.zip

@@ -188,7 +188,7 @@ Commands:
 	fmt.Fprint(out, `
 Run 'uvcctl help <command>' for details and options.
 
-Stop exposure / white balance drift:
+Fix the camera's settings in place:
   uvcctl set exposure=167 white_balance=4600 gain=0 power_line_frequency=60hz
   uvcctl save camera.json
   uvcctl load camera.json --watch
@@ -569,7 +569,7 @@ func reportMismatch(out io.Writer, cam *uvc.Camera, want map[string]int) map[str
 	return got
 }
 
-// watch keeps a profile applied: it re-applies when a value drifts, and
+// watch keeps a profile applied: it re-applies when a value changes, and
 // when the camera is unplugged and comes back.
 func watch(out io.Writer, sel string, p *Profile, every time.Duration) error {
 	logf := func(format string, a ...any) {
@@ -622,7 +622,7 @@ func watch(out io.Writer, sel string, p *Profile, every time.Duration) error {
 			continue
 		}
 		if len(drifted) > 0 {
-			logf("drift detected (%s); re-applying", strings.Join(drifted, ", "))
+			logf("settings changed (%s); re-applying", strings.Join(drifted, ", "))
 			if err := cam.Apply(vals); err != nil {
 				logf("apply: %v", err)
 			}
