@@ -1,6 +1,6 @@
 # uvcctl
 
-Take manual control of USB camera settings and keep them that way. uvcctl is a small command-line tool and Go library for setting exposure, white balance, gain, focus and the other image controls to exact values, saving them, and re-applying them whenever the camera resets. It runs on macOS, Linux and Windows, and works with any UVC camera: Arducam, Logitech and most other USB webcams.
+uvcctl provides manual control of USB camera settings and keeps them that way. It's a small command-line tool and Go library for setting exposure, white balance, gain, focus and the other image controls to exact values, saving them, and re-applying them whenever the camera resets. It runs on macOS, Linux and Windows, and works with any UVC camera: Arducam, Logitech and most other USB webcams.
 
 ```
 $ uvcctl show
