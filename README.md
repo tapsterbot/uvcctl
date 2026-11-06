@@ -29,7 +29,7 @@ By default, a USB camera is tuned for convenience, not repeatability. Two things
 
 2. **The camera forgets everything when it loses power.** USB cameras keep their settings in temporary memory, not in storage that survives power loss. Unplugging the camera, rebooting the computer, sleep and USB hub resets all put the camera back to factory defaults, auto modes included. Your settings have to be stored on the computer and applied again. uvcctl keeps them in a small *profile* file and can re-apply it automatically.
 
-Opening and closing the camera doesn't normally reset its settings, but other apps can change them, and some do when they open the camera.
+Opening and closing the camera doesn't normally reset the values you set, but other apps can change them, and some do when they open the camera. Values an auto mode picked are less dependable: some cameras, including the Arducam 16MP, drop the exposure and white balance their auto modes chose when the next stream starts (see [About `lock`](#about-lock)).
 
 ---
 
@@ -177,7 +177,11 @@ The aliases match the names `v4l2-ctl` uses on Linux, so existing scripts transl
 `uvcctl lock` turns the auto modes on, waits a few seconds, then turns them off, which freezes the image wherever the auto modes left it. It's a quick fix, but it has limits:
 
 - The camera must be **streaming** while it runs, because the auto modes only adjust while video is flowing.
-- Many cameras, **including the Arducam 16MP**, don't report the values their auto modes chose, and go back to the last manual values when a new stream starts. On those cameras the lock only lasts until the camera is closed, and the values can't be saved. uvcctl warns you when this happens.
+- Some cameras don't report the values their auto modes chose. On the **Arducam 16MP** (`0c45:0290`), this affects exposure and white balance:
+  - While auto exposure or auto white balance runs, and after it's turned off, `get` and `show` return the last value you set, not what the camera is using.
+  - When the next stream starts, the camera goes back to that last value you set.
+
+  So on this camera, locking exposure and white balance only lasts until the camera is closed, and those values can't be saved. Focus is not affected: autofocus reports its value, and the value survives a new stream, so `lock` and `save` work for focus. uvcctl warns you about any values that went unreported.
 
 For settings that last, use `set`, then `save`, then `load` (see [Getting started](#getting-started-fixed-repeatable-camera-settings)).
 
